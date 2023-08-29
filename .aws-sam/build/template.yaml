@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'resume-processor-app
+
+  Sample SAM Template for resume-processor-app
+
+  '
+Globals:
+  Function:
+    Timeout: 20
+    MemorySize: 128
+    Tracing: Active
+  Api:
+    TracingEnabled: true
+Resources:
+  ResumeProcessorApp:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ResumeProcessorApp
+      Handler: resumeprocessorapp.App::handleRequest
+      Runtime: java11
+      MemorySize: 768
+      Tracing: Active
+      Environment:
+        Variables:
+          POWERTOOLS_LOG_LEVEL: INFO
+          POWERTOOLS_LOGGER_LOG_EVENT: true
+          POWERTOOLS_METRICS_NAMESPACE: resume-processor-app
+          UPLOAD_RESUME_URI: /upload-resume
+          FETCH_RESUME_CONTENT_URI: /resumes
+          JAVA_TOOL_OPTIONS: -XX:+TieredCompilation -XX:TieredStopAtLevel=1
+      Events:
+        ResumeProcessorApi:
+          Type: Api
+          Properties:
+            Path: /resumes
+            Method: get
+        FileUploaderAPI:
+          Type: Api
+          Properties:
+            Path: /upload-resume
+            Method: POST
+    Metadata:
+      SamResourceId: ResumeProcessorApp
+Outputs:
+  ResumeProcessorApi:
+    Description: API Gateway endpoint URL for Prod stage for Resume Processor Function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/
+  ResumeProcessorApp:
+    Description: ResumeProcessorApp ARN
+    Value:
+      Fn::GetAtt:
+      - ResumeProcessorApp
+      - Arn

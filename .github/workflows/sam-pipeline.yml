@@ -1,30 +1,28 @@
 on:
-push:
- branches:
-   - main
+  push:
+    branches:
+      - main
+  # repository_dispatch:
+  #   types: [webhook-event]
 jobs:
-build-deploy:
- runs-on: ubuntu-latest
-#  env :
-#    FROM : ${{ secrets.FROM }}
-#    TO : ${{ secrets.TO }}
- steps:
-   - uses: actions/checkout@v2
-   - uses: actions/setup-python@v2
-   - uses: aws-actions/setup-sam@v1
-   - uses: aws-actions/configure-aws-credentials@v1
-     with:
-       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-       aws-region: ap-south-1    
-   # Build Java
-   - run: mvn clean package
-   #Email subtitution
-  #  - run : eval 'sed -i "s/SENDER_EMAIL:.*/SENDER_EMAIL':' $FROM/" template.yaml'
-  #  - run : eval 'sed -i "s/RECEIVER_EMAIL:.*/RECEIVER_EMAIL':' $TO/" template.yaml'
-   # sam package 
-   - run: sam package --template-file template.yaml --s3-bucket aws-lambda-default -- 
-             output-template-file output-template.yml
-    # sam deploy
-   - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ResumeProcessorApp --s3-bucket aws-lambda-default --capabilities CAPABILITY_IAM --region 
-              ap-south-1
+  build-deploy:
+    runs-on: ubuntu-latest
+    # env :
+    #   FROM : ${{ secrets.FROM }}
+    #   TO : ${{ secrets.TO }}
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - uses: aws-actions/setup-sam@v1
+      - uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-1    
+      # Build Java
+      - run: mvn clean package
+      # sam build 
+      - run: sam package --template-file template.yaml --s3-bucket aws-lambda-default --output-template-file output-tempate.yml
+
+# sam deploy
+      - run: sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --stack-name ResumeProcessorApp --s3-bucket aws-lambda-default --capabilities CAPABILITY_IAM --region ap-south-1 
